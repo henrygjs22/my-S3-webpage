@@ -1,0 +1,30 @@
+# Terraform 檔案
+*.tfstate
+*.tfstate.*
+*.tfvars
+!*.tfvars.example
+.terraform/
+.terraform.lock.hcl
+crash.log
+crash.*.log
+
+# AWS 憑證檔案
+.aws/
+
+# 編輯器檔案
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# 作業系統檔案
+.DS_Store
+Thumbs.db
+
+# 日誌檔案
+*.log
+
+# 臨時檔案
+*.tmp
+*.temp
