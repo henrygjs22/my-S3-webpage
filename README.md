@@ -23,7 +23,14 @@
 ├── src/
 │   ├── index.html         # 靜態網站首頁
 │   └── index.js          # JavaScript 功能
-├── main.tf                # 主要 Terraform 配置
+├── lambda/
+│   ├── s3_discord_notification.py    # S3 事件通知 Lambda
+│   └── presigned_url_generator.py    # 預簽名 URL Lambda
+├── config.tf              # Terraform 基本配置
+├── s3.tf                  # S3 相關資源
+├── cloudfront.tf          # CloudFront 相關資源
+├── lambda.tf              # Lambda 函數相關資源
+├── api_gateway.tf         # API Gateway 相關資源
 ├── variables.tf           # 變數定義
 ├── outputs.tf             # 輸出值定義
 ├── terraform.tfvars.example # 變數範例檔案
@@ -46,13 +53,16 @@
    cp terraform.tfvars.example terraform.tfvars
    ```
 
-2. **編輯變數檔案** (可選)
+2. **編輯變數檔案**
    ```bash
    # 修改 terraform.tfvars 中的設定
+   discord_webhook_url = "https://discord.com/api/webhooks/YOUR_WEBHOOK_ID/YOUR_WEBHOOK_TOKEN"
    aws_region = "ap-northeast-1"
    environment = "production"
    bucket_name_prefix = "my-website"
    ```
+   
+   **重要**: 必須設定 `discord_webhook_url` 變數，用於 S3 事件通知功能。
 
 3. **初始化 Terraform**
    ```bash

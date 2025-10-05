@@ -1,4 +1,4 @@
-# Terraform 檔案
+# Terraform 相關檔案
 *.tfstate
 *.tfstate.*
 *.tfvars
@@ -8,23 +8,23 @@
 crash.log
 crash.*.log
 
-# AWS 憑證檔案
-.aws/
+# Lambda 部署包
+lambda/*.zip
 
-# 編輯器檔案
+# 環境變數檔案
+.env
+.env.local
+.env.*.local
+
+# 系統檔案
+.DS_Store
+Thumbs.db
+
+# IDE 檔案
 .vscode/
 .idea/
 *.swp
 *.swo
-*~
-
-# 作業系統檔案
-.DS_Store
-Thumbs.db
 
 # 日誌檔案
 *.log
-
-# 臨時檔案
-*.tmp
-*.temp

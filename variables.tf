@@ -31,3 +31,13 @@ variable "cloudfront_price_class" {
     error_message = "CloudFront 價格等級必須是 PriceClass_All、PriceClass_200 或 PriceClass_100。"
   }
 }
+
+variable "discord_webhook_url" {
+  description = "Discord Webhook URL 用於 S3 事件通知"
+  type        = string
+  sensitive   = true
+  validation {
+    condition     = can(regex("^https://discord\\.com/api/webhooks/", var.discord_webhook_url))
+    error_message = "Discord Webhook URL 必須是有效的 Discord webhook URL。"
+  }
+}

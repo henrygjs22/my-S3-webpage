@@ -1,4 +1,5 @@
 import json
+import os
 import urllib3
 import boto3
 
@@ -22,7 +23,13 @@ def lambda_handler(event, context):
         message_content = f"📸 有新圖片上傳到 S3 囉！\n\n**檔案名稱**: {object_key}\n**儲存貯體**: {bucket_name}\n**上傳時間**: {event_time}\n**事件類型**: {event_name}"
         
         # 3. Discord Webhook 資料
-        webhook_url = "https://discord.com/api/webhooks/1307026207325552781/yiAZaCxjkc_z8VQ4NhXMYYYZ0JaHudsy8qB1PzHT3uk7vncEghXEbBigSDoRrOPoC6kT"
+        webhook_url = os.environ.get('DISCORD_WEBHOOK_URL')
+        if not webhook_url:
+            print("Error: DISCORD_WEBHOOK_URL environment variable is not set")
+            return {
+                'statusCode': 500,
+                'body': json.dumps('Discord webhook URL not configured')
+            }
         
         discord_data = {
             "content": message_content,

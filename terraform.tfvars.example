@@ -1,0 +1,18 @@
+# Terraform 變數範本檔案
+# 複製此檔案為 terraform.tfvars 並填入實際值
+
+# Discord Webhook URL (從 Discord 頻道設定中取得)
+# 格式: https://discord.com/api/webhooks/{webhook_id}/{webhook_token}
+discord_webhook_url = "https://discord.com/api/webhooks/YOUR_WEBHOOK_ID/YOUR_WEBHOOK_TOKEN"
+
+# AWS 區域 (可選，預設為 ap-east-2)
+# aws_region = "ap-east-2"
+
+# 環境名稱 (可選，預設為 production)
+# environment = "production"
+
+# S3 bucket 名稱前綴 (可選，預設為 static-website)
+# bucket_name_prefix = "static-website"
+
+# CloudFront 價格等級 (可選，預設為 PriceClass_100)
+# cloudfront_price_class = "PriceClass_100"
