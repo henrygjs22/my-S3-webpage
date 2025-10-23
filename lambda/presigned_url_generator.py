@@ -34,16 +34,20 @@ def lambda_handler(event, context):
         timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
         unique_file_name = f"uploads/{timestamp}_{file_name}"
         
-        # 創建 S3 客戶端
-        s3_client = boto3.client('s3')
+        # 創建 S3 客戶端，指定正確的區域端點
+        s3_client = boto3.client(
+            's3',
+            region_name='ap-east-2',
+            endpoint_url='https://s3.ap-east-2.amazonaws.com'
+        )
         
         # 生成預簽名 URL (有效期 1 小時)
         presigned_url = s3_client.generate_presigned_url(
             'put_object',
             Params={
                 'Bucket': bucket_name,
-                'Key': unique_file_name
-                # 移除 ContentType 避免預檢請求
+                'Key': unique_file_name,
+                'ContentType': file_type
             },
             ExpiresIn=3600  # 1 小時
         )

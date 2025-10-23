@@ -54,7 +54,7 @@ function changeColor() {
 }
 
 // API Gateway 配置
-const API_GATEWAY_URL = 'https://adwt4z6r2j.execute-api.ap-east-2.amazonaws.com/prod/presigned-url';
+const API_GATEWAY_URL = 'REPLACE_WITH_API_GATEWAY_URL';
 
 // 使用預簽名 URL 上傳到 S3
 async function uploadImages() {
@@ -118,19 +118,17 @@ async function uploadImages() {
             showStatus(`正在上傳 "${file.name}" 到 S3...`, 'info');
             
             // 2. 使用預簽名 URL 上傳到 S3
-            const uploadResponse = await new Promise((resolve, reject) => {
-                const xhr = new XMLHttpRequest();
-                xhr.open('PUT', presignedUrl, true);
-                xhr.onload = () => {
-                    if (xhr.status >= 200 && xhr.status < 300) {
-                        resolve({ ok: true, status: xhr.status });
-                    } else {
-                        reject(new Error(`S3 上傳失敗: ${xhr.status}`));
-                    }
-                };
-                xhr.onerror = () => reject(new Error('網路錯誤'));
-                xhr.send(file);
+            const uploadResponse = await fetch(presignedUrl, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': file.type,
+                },
+                body: file
             });
+            
+            if (!uploadResponse.ok) {
+                throw new Error(`S3 上傳失敗: ${uploadResponse.status}`);
+            }
             
             showStatus(`✅ 圖片 "${file.name}" 上傳成功！Discord 通知已發送。`, 'success');
             console.log(`📸 圖片上傳成功: ${fileName}`);

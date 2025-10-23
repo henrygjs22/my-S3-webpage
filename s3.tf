@@ -11,6 +11,8 @@ resource "random_string" "bucket_suffix" {
 resource "aws_s3_bucket" "website_bucket" {
   bucket = "${var.bucket_name_prefix}-${random_string.bucket_suffix.result}"
 
+  force_destroy = true  # 允許 Terraform 刪除非空 bucket
+
   tags = local.common_tags
 }
 
@@ -49,11 +51,7 @@ resource "aws_s3_bucket_cors_configuration" "website_bucket_cors" {
   cors_rule {
     allowed_headers = ["*"]
     allowed_methods = ["PUT", "GET", "HEAD", "POST"]
-    allowed_origins = [
-      "*",
-      "https://${aws_cloudfront_distribution.website_distribution.domain_name}",
-      "https://d2wgdch25moel1.cloudfront.net"
-    ]
+    allowed_origins = ["*"]
     expose_headers  = ["ETag", "x-amz-request-id"]
     max_age_seconds = 3000
   }
@@ -64,7 +62,7 @@ resource "aws_s3_bucket_public_access_block" "website_bucket_pab" {
   bucket = aws_s3_bucket.website_bucket.id
 
   block_public_acls       = true
-  block_public_policy     = true
+  block_public_policy     = false  # 允許 bucket 政策，用於預簽名 URL 上傳
   ignore_public_acls      = true
   restrict_public_buckets = true
 }
@@ -89,6 +87,13 @@ resource "aws_s3_bucket_policy" "website_bucket_policy" {
             "AWS:SourceArn" = aws_cloudfront_distribution.website_distribution.arn
           }
         }
+      },
+      {
+        Sid    = "AllowPresignedUrlUploads"
+        Effect = "Allow"
+        Principal = "*"
+        Action = "s3:PutObject"
+        Resource = "${aws_s3_bucket.website_bucket.arn}/uploads/*"
       }
     ]
   })
@@ -99,14 +104,24 @@ resource "aws_s3_bucket_policy" "website_bucket_policy" {
   ]
 }
 
-# 上傳靜態網站檔案到 S3
+# 上傳 index.js (帶字串替換)
+resource "aws_s3_object" "index_js" {
+  bucket  = aws_s3_bucket.website_bucket.id
+  key     = "index.js"
+  content = replace(file("${path.module}/src/index.js"), "REPLACE_WITH_API_GATEWAY_URL", "${aws_api_gateway_stage.main.invoke_url}/presigned-url")
+  etag    = md5(replace(file("${path.module}/src/index.js"), "REPLACE_WITH_API_GATEWAY_URL", "${aws_api_gateway_stage.main.invoke_url}/presigned-url"))
+
+  content_type = "application/javascript; charset=utf-8"
+}
+
+# 上傳其他靜態網站檔案到 S3
 resource "aws_s3_object" "website_files" {
-  for_each = fileset("${path.module}/src", "*.{html,js,css}")
+  for_each = fileset("${path.module}/src", "*.{html,css}")
 
   bucket = aws_s3_bucket.website_bucket.id
   key    = each.value
   source = "${path.module}/src/${each.value}"
   etag   = filemd5("${path.module}/src/${each.value}")
 
-  content_type = each.value == "index.html" ? "text/html; charset=utf-8" : (each.value == "index.js" ? "application/javascript; charset=utf-8" : "text/css; charset=utf-8")
+  content_type = each.value == "index.html" ? "text/html; charset=utf-8" : "text/css; charset=utf-8"
 }
